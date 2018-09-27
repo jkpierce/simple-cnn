@@ -36,7 +36,7 @@ class Dataset:
                                  	transforms.Normalize(mean=[0.5],std=[0.25])
                                        ])
         img = transform(img)
-	if mode=='train':
+        if mode=='train':
             img.requires_grad=True
         vect = torch.FloatTensor(np.concatenate(vect)) 
         return img, vect 
@@ -69,14 +69,15 @@ class Net(nn.Module):
         return x
 
 # initialize the model 
-model = Net().to(device).train()
+# model = Net().to(device).train()
+model = torch.load('./partial-trains/0490-epochs.pt').to(device).train()
 criterion = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.01)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer,verbose=True)
 losses = []
 
 # set up the training loop and dataset iterator 
-k = 128 #size of batch 
+k = 250 #size of batch 
 N = 500 #number epochs
 b = int(len(train_data)/k) #number of batches
 train_loader = DataLoader(train_data , batch_size = k, shuffle = True) #batch data loader
@@ -95,7 +96,7 @@ for epoch in range(N): # epoch iterator
     epoch_loss /= i
     print('epoch loss: ',round(epoch_loss,2)) # print/store loss
     if epoch%10==0 and epoch!=0:     
-        n = epoch
+        n = epoch + 490 
         torch.save(model,'./partial-trains/%04d-epochs.pt'%n) # save partially trained model 
     losses.append(epoch_loss) # keep the losses 
     scheduler.step(epoch_loss) # possibly modify the learning rate 
